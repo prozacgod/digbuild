@@ -1,0 +1,7 @@
+this is a basic test, I'm not that clever with opengl, bugs are probably rampant!
+
+get 30 fps on my laptop and I'm not sure why it isn't going crazy fast, the
+entire list of 3k poygons is in a display list and I'm lost on how to make it
+better,
+
+Python, Pyglet
