@@ -44,7 +44,7 @@ class MineWindow(object):
 		self.LightDiffuse  = (GLfloat*4)(1.0, 1.0, 1.0, 1.0)
 		self.LightPosition = (GLfloat*4)(0.0, 0.0, 2.0, 1.0)		
 		
-		self.window = pyglet.window.Window(width=1024, height=768, caption="Minecrack", visible=False, resizable=True)
+		self.window = pyglet.window.Window(width=1024, height=768, caption="Minecrack", visible=False, resizable=True, vsync=False)
 		self.glInit()
 		self.worldInit()
 		
@@ -72,27 +72,32 @@ class MineWindow(object):
 		self.lookupdown  = 0.0
 	
 	def drawMap(self):
+		by_texture = {}
 		for quad in self.mine_map.quads:
-			glBindTexture(GL_TEXTURE_2D, self.textures[quad[4]].id)
+			if (not quad[4] in by_texture):
+				by_texture[quad[4]] = [quad]
+			else:
+				by_texture[quad[4]] += [quad]
 
-			glBegin(GL_QUADS)
+		for texture_i in by_texture:
+			quads = by_texture[texture_i]
 			
-			glNormal3f( 0.0, 0.0, 1.0)
+			glBindTexture(GL_TEXTURE_2D, self.textures[texture_i].id)
+			glBegin(GL_QUADS)
+			for quad in quads:
+				glNormal3f(0.0, 0.0, 1.0)
+				glTexCoord2f(0.0, 0.0)
+				glVertex3f(quad[0][0], quad[0][1], quad[0][2])
 
-			glTexCoord2f(0.0, 0.0)
-			glVertex3f(quad[0][0], quad[0][1], quad[0][2])
+				glTexCoord2f(1.0, 0.0)
+				glVertex3f(quad[1][0], quad[1][1], quad[1][2])
 
-			glTexCoord2f(1.0, 0.0)
-			glVertex3f(quad[1][0], quad[1][1], quad[1][2])
+				glTexCoord2f(1.0, 1.0)
+				glVertex3f(quad[2][0], quad[2][1], quad[2][2])
 
-			glTexCoord2f(1.0, 1.0)
-			glVertex3f(quad[2][0], quad[2][1], quad[2][2])
-
-			glTexCoord2f(0.0, 1.0)
-			glVertex3f(quad[3][0], quad[3][1], quad[3][2])
-
-			glEnd()
-
+				glTexCoord2f(0.0, 1.0)
+				glVertex3f(quad[3][0], quad[3][1], quad[3][2])
+			glEnd()    
 		
 	def createMapDisplayList(self):
 		glNewList(1, GL_COMPILE)
