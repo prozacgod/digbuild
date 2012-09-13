@@ -38,13 +38,15 @@ class MineWindow(object):
 		self.zpos = 2
 		self.ypos = 1.5
 
-		self.lookupdown = 0.0
+		self.lookupdown = 0.5
 
 		self.LightAmbient  = (GLfloat*4)(0.5, 0.5, 0.5, 1.0)
 		self.LightDiffuse  = (GLfloat*4)(1.0, 1.0, 1.0, 1.0)
 		self.LightPosition = (GLfloat*4)(0.0, 0.0, 2.0, 1.0)		
 		
 		self.window = pyglet.window.Window(width=1024, height=768, caption="Minecrack", visible=False, resizable=True, vsync=False)
+		self.w_width = 1024
+		self.w_height = 768
 		self.glInit()
 		self.worldInit()
 		
@@ -68,8 +70,6 @@ class MineWindow(object):
 		#glLightfv( GL_LIGHT1, GL_POSITION, self.LightPosition)
 		#glEnable(GL_LIGHT1)
 		#glColor4f( 1.0, 1.0, 1.0, 0.5)		
-
-		self.lookupdown  = 0.0
 	
 	def drawMap(self):
 		by_texture = {}
@@ -125,6 +125,7 @@ class MineWindow(object):
 		self.window.on_resize = self.on_resize
 		self.window.on_key_press = self.on_key_press
 		self.window.on_key_release = self.on_key_release
+		self.window.on_mouse_motion = self.on_mouse_motion
 
 	def on_resize(self, width, height):
 		if height==0:
@@ -153,6 +154,11 @@ class MineWindow(object):
 			return self.key_state[(sym,mod)]
 		return False
 
+	def on_mouse_motion(self, x, y, dx, dy):
+		self.yrot -= dx;
+		self.lookupdown -= dy
+		pass
+
 	def updateFrame(self):
 		global piover180
 		xpos = self.xpos
@@ -161,20 +167,28 @@ class MineWindow(object):
 
 		currentCell = self.mine_map.getCell(trunc(xpos), trunc(zpos), trunc(xpos))
 		
-		if self.getKeyState(key.RIGHT):
-			self.yrot -= 2.5
+		#if self.getKeyState(key.RIGHT):
+		#	self.yrot -= 2.5
 			
-		if self.getKeyState(key.LEFT):
-			self.yrot += 2.5
+		#if self.getKeyState(key.LEFT):
+		#	self.yrot += 2.5
 			
-		if self.getKeyState(key.UP):
+		if self.getKeyState(key.W):
 			xpos -= sin(self.yrot * piover180) * 0.025
 			zpos -= cos(self.yrot * piover180) * 0.025
 			
-		if self.getKeyState(key.DOWN):
+		if self.getKeyState(key.S):
 			xpos += sin(self.yrot * piover180) * 0.025
 			zpos += cos(self.yrot * piover180) * 0.025
 			
+		if self.getKeyState(key.D):
+			xpos += sin((self.yrot+90) * piover180) * 0.025
+			zpos += cos((self.yrot+90) * piover180) * 0.025
+			
+		if self.getKeyState(key.A):
+			xpos += sin((self.yrot-90) * piover180) * 0.025
+			zpos += cos((self.yrot-90) * piover180) * 0.025
+
 		cellX = trunc(xpos)
 		cellY = trunc(ypos)
 		cellZ = trunc(zpos)
@@ -227,6 +241,9 @@ class MineWindow(object):
 
 	def run(self):
 		self.window.set_visible()
+		self.window.set_mouse_visible(False)
+		self.window.set_exclusive_mouse(True)
+
 		clock = pyglet.clock.Clock()
 		fps_display = pyglet.clock.ClockDisplay()
 		while not self.window.has_exit:
