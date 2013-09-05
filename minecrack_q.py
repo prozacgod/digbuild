@@ -44,9 +44,9 @@ class MineWindow(object):
 		self.LightDiffuse  = (GLfloat*4)(1.0, 1.0, 1.0, 1.0)
 		self.LightPosition = (GLfloat*4)(0.0, 0.0, 2.0, 1.0)		
 		
-		self.window = pyglet.window.Window(width=1024, height=768, caption="Minecrack", visible=False, resizable=True, vsync=False)
-		self.w_width = 1024
-		self.w_height = 768
+		self.window = pyglet.window.Window(caption="Minecrack", visible=False, resizable=True, vsync=False, fullscreen=True)
+		self.w_width = 2560
+		self.w_height = 1440
 		self.glInit()
 		self.worldInit()
 		
