@@ -107,7 +107,8 @@ class MineWindow(object):
 		
 	def loadTextures(self):
 		for i in range(6):
-			texturefile = os.path.join('data', str(i) + '.jpg')
+			texturefile = os.path.join('data', str(i) + '.png')
+			print "Loading:", texturefile
 			textureSurface = image.load(texturefile)
 		
 			gl_texture = textureSurface.mipmapped_texture
@@ -137,10 +138,10 @@ class MineWindow(object):
 		glMatrixMode(GL_MODELVIEW)
 		
 	def on_key_press(self, sym, mod):
-		self.key_state[(sym,mod)] = True
+		self.key_state[sym] = True
 		
 	def on_key_release(self, sym, mod):
-		self.key_state[(sym,mod)] = False
+		self.key_state[sym] = False
 		
 		if sym == key.ESCAPE:
 			self.window.has_exit = True
@@ -150,8 +151,8 @@ class MineWindow(object):
 				self.filter = 0
 
 	def getKeyState(self, sym, mod=0):
-		if (sym, mod) in self.key_state:
-			return self.key_state[(sym,mod)]
+		if sym in self.key_state:
+			return self.key_state[sym]
 		return False
 
 	def on_mouse_motion(self, x, y, dx, dy):
