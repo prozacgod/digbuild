@@ -1,7 +1,18 @@
-this is a basic test, I'm not that clever with opengl, bugs are probably rampant!
-
-get 30 fps on my laptop and I'm not sure why it isn't going crazy fast, the
-entire list of 3k poygons is in a display list and I'm lost on how to make it
-better,
-
 Python, Pyglet
+
+This is a basic test, I'm not that clever with opengl, bugs are probably rampant!
+
+~~get 30 fps on my laptop and I'm not sure why it isn't going crazy fast, the
+entire list of 3k poygons is in a display list and I'm lost on how to make it
+better,~~
+
+Okay so it has to deal with context switching or something, as I discovered like
+4 years ago, when you order the geometry by texture, it's insanely fast.  This
+explains why so many games do a "texture stitching" step.  Put it all into one
+texture and move it around by UV's
+
+I get like 1000 fps on a GTX 770 and it's hard to actually walk around right,
+since the movement isn't time based.  Happy to have found the old source code in
+order to update this
+
+
