@@ -27,7 +27,20 @@ class MineWindow:
       font_name='Times New Roman',
       font_size=36,
       x=10, y=10,
-      anchor_x='left', anchor_y='bottom')
+      anchor_x='left', anchor_y='top')
+
+    self.coordLabel = pyglet.text.Label('Coord:',
+      font_name='Times New Roman',
+      font_size=36,
+      x=10, y=10,
+      anchor_x='left', anchor_y='top')
+
+    self.blocklabel = pyglet.text.Label('Block:',
+      font_name='Times New Roman',
+      font_size=36,
+      x=10, y=10,
+      anchor_x='left', anchor_y='top')
+
 
     self.textures = []
     self.filter = 0
@@ -39,7 +52,7 @@ class MineWindow:
     self.ypos = 0
 
     self.lookupdown = 0.5
-    self.gravity = 9.8
+    self.gravity = -9.8
     self.velocity_y = 0
 
     self.LightAmbient  = (GLfloat*4)(0.5, 0.5, 0.5, 1.0)
@@ -171,19 +184,36 @@ class MineWindow:
     global piover180
 
     xpos = self.xpos
-    ypos = self.ypos
+    ypos = -self.ypos
     zpos = self.zpos
+
+    bxpos = trunc(xpos)
+    bypos = trunc(zpos)
+    bzpos = trunc(ypos)
+
+    ibzpos = ypos - bzpos
 
     self.velocity_y += self.gravity * dt
 
     ypos += self.velocity_y * dt
 
-    if ypos > 0:
+    self.coordLabel.text = f'Coord: ({xpos:.2f}, {ypos:.2f}, {zpos:.2f}) :: ({bxpos}, {bypos}, {bzpos}) :: {ibzpos}'
+
+    currentCell = self.mine_map.getCell(bxpos, bypos, bzpos)
+    belowCell = self.mine_map.getCell(bxpos, bypos, bzpos - 1)
+
+    footCell = self.mine_map.getCell(trunc(xpos), trunc(zpos), trunc(ypos-0.01))
+
+    self.blocklabel.text = f'Block {currentCell}, {belowCell}'
+
+    if ypos < 0:
       ypos = 0
       self.velocity_y = 0
-
-    currentCell = self.mine_map.getCell(trunc(xpos), trunc(zpos), trunc(xpos))
       
+    if footCell >= 0:
+      ypos = -self.ypos
+      self.velocity_y = 0
+
     if self.getKeyState(key.W):
       xpos -= dt * sin(self.yrot * piover180)*2
       zpos -= dt * cos(self.yrot * piover180)*2
@@ -201,39 +231,38 @@ class MineWindow:
       zpos += dt * cos((self.yrot-90) * piover180)*2
 
     if self.getKeyState(key.SPACE):
-      self.velocity_y = -10
+      self.velocity_y = 10
       print('jump')
 
-    cellX = trunc(xpos)
-    cellY = trunc(ypos)
-    cellZ = trunc(zpos)
-    
-    icellX = xpos - cellX
-    icellY = ypos - cellY
-    icellZ = zpos - cellZ
+    bxpos = trunc(xpos)
+    bypos = trunc(zpos)
+    bzpos = trunc(ypos)
         
-    left = self.mine_map.getCell(cellX - 1, cellZ, cellY)
-    right = self.mine_map.getCell(cellX + 1, cellZ, cellY)
-    fore = self.mine_map.getCell(cellX, cellZ-1, cellY)
-    aft = self.mine_map.getCell(cellX, cellZ+1, cellY)
+    ibxpos = xpos - bxpos
+    ibypos = zpos - bypos
+    ibzpos = ypos - bzpos
+        
+    left = self.mine_map.getCell(bxpos - 1, bypos, bzpos)
+    right = self.mine_map.getCell(bxpos + 1, bypos, bzpos)
+    fore = self.mine_map.getCell(bxpos, bypos-1, bzpos)
+    aft = self.mine_map.getCell(bxpos, bypos+1, bzpos)
+
+    below = self.mine_map.getCell(bxpos, bypos, bzpos-1)
     
-    down = self.mine_map.getCell(cellX, cellZ, cellY-1)
-    below = self.mine_map.getCell(cellX, cellZ, cellY-1)
-    
-    if (icellX < .10) and (left > 0):
-      xpos = cellX + .10
+    if (ibxpos < .10) and (left >= 0):
+      xpos = bxpos + .10
       
-    if (icellX > .90) and (right > 0):
-      xpos = cellX + .90
+    if (ibxpos > .90) and (right >= 0):
+      xpos = bxpos + .90
     
-    if (icellZ < .10) and (fore > 0):
-      zpos = cellZ + .10
+    if (ibypos < .10) and (fore >= 0):
+      zpos = bypos + .10
       
-    if (icellZ > .90) and (aft > 0):
-      zpos = cellZ + .90
+    if (ibypos > .90) and (aft >= 0):
+      zpos = bypos + .90
     
     self.xpos = xpos
-    self.ypos = ypos
+    self.ypos = -ypos
     self.zpos = zpos
     
 
@@ -250,18 +279,23 @@ class MineWindow:
     glTranslatef(xtrans, ytrans, ztrans)
     glCallList(1);
   
-  def update_fps(self):
-    self.label.text = f'FPS: {pyglet.clock.get_fps():.2f}'
+  def update_fps(self, clock):
+    self.label.text = f'FPS: {clock.get_fps():.2f}'
 
   def run(self):
-    pyglet.clock.schedule_interval(lambda dt: self.update_fps(dt), 1.0)
+    self.label.text = 'asdfas'
 
     self.window.set_visible()
     self.window.set_mouse_visible(False)
     self.window.set_exclusive_mouse(True)
 
     clock = pyglet.clock.Clock()
+    frame = 0
     while not self.window.has_exit:
+      frame = (frame + 1) % 10
+      if (frame == 0):
+        self.update_fps(clock)
+
       dt = clock.tick()
 
       self.window.dispatch_events()
@@ -269,8 +303,14 @@ class MineWindow:
       self.setup_3d()
       self.draw()
       self.setup_2d()
-      self.label.y = 10
+      self.label.y = self.window.height - 10
       self.label.draw()
+
+      self.coordLabel.y = self.window.height - 56
+      self.coordLabel.draw()
+
+      self.blocklabel.y = self.window.height - 102
+      self.blocklabel.draw()
       self.window.flip()
 
     print("fps:  %d" % clock.get_fps())
