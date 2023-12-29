@@ -7,7 +7,7 @@
 #TODO: if you walk at a very perfect 45 towards a corner, you can enter a block!
 
 import os, random
-from string import split
+#from string import split
 from math import sin, cos, trunc
 from pyglet.gl import *
 from pyglet import window
@@ -21,8 +21,7 @@ piover180 = 0.0174532925
 
 class MineWindow(object):
 	def __init__(self):
-		platform = pyglet.window.get_platform()
-		display = platform.get_default_display()
+		display = pyglet.canvas.Display()
 		screen = display.get_default_screen()
 
 		template = pyglet.gl.Config(alpha_size=8)
@@ -108,10 +107,10 @@ class MineWindow(object):
 	def loadTextures(self):
 		for i in range(6):
 			texturefile = os.path.join('data', str(i) + '.png')
-			print "Loading:", texturefile
+			print("Loading:", texturefile)
 			textureSurface = image.load(texturefile)
 		
-			gl_texture = textureSurface.mipmapped_texture
+			gl_texture = textureSurface.get_mipmapped_texture() #mipmapped_texture
 			glBindTexture(GL_TEXTURE_2D, gl_texture.id)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -120,7 +119,7 @@ class MineWindow(object):
 
 	def worldInit(self):
 		self.mine_map = MineMap('minemap.txt')
-		print len(self.mine_map.quads)
+		print(len(self.mine_map.quads))
 			
 	def eventInit(self):
 		self.window.on_resize = self.on_resize
@@ -246,17 +245,17 @@ class MineWindow(object):
 		self.window.set_exclusive_mouse(True)
 
 		clock = pyglet.clock.Clock()
-		fps_display = pyglet.clock.ClockDisplay()
+		#fps_display = pyglet.clock.ClockDisplay()
 		while not self.window.has_exit:
 			self.window.dispatch_events()
 			self.updateFrame()
-			fps_display.draw()
+			#fps_display.draw()
 			self.draw()
 			self.window.flip()
 			
 			dt = clock.tick()
 
-		print "fps:  %d" % clock.get_fps()
+		print("fps:  %d" % clock.get_fps())
 
 
 def main():
